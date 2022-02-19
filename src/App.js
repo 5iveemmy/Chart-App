@@ -61,7 +61,7 @@ const App = () => {
           ]}
         />
       ) : (
-        <div>Loading bitches</div>
+        <div>Loading...</div>
       )}
     </>
   );
