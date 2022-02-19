@@ -3,30 +3,37 @@ import Chart from "react-apexcharts";
 import axios from "axios";
 
 const App = () => {
-  const [category, setCategory] = useState([]);
   const [data, setData] = useState([]);
+  const [chartData, setchartData] = useState({});
 
   useEffect(() => {
-    const year = [];
-    const count = [];
-
     const options = {
       method: "GET",
       url: "https://imdb8.p.rapidapi.com/actors/get-awards",
       params: { nconst: "nm0001667" },
       headers: {
         "x-rapidapi-host": "imdb8.p.rapidapi.com",
-        "x-rapidapi-key": "c64538c0e3msh7c9379f641df305p18061djsncb2135f14de5",
+        "x-rapidapi-key": "730d0e5c7bmshad1255dc9b8ad39p1e833fjsnc5e1c8b1c4dc",
       },
     };
 
     axios
       .request(options)
-      .then(function (response) {
-        console.log(response.data);
-        response.data.awards[0].map((item) => {
-          year.push(item.year);
-        });
+      .then(function ({ data: { resource } }) {
+        console.log(resource?.awards);
+        setData(resource?.awards);
+        const years = data?.map((x) => x.year);
+        const yearsCount = {};
+
+        for (const year of years) {
+          if (yearsCount[year]) {
+            yearsCount[year] += 1;
+          } else {
+            yearsCount[year] = 1;
+          }
+        }
+        console.log(yearsCount);
+        setchartData(yearsCount);
       })
       .catch(function (error) {
         console.error(error);
@@ -34,17 +41,29 @@ const App = () => {
   });
 
   return (
-    <Chart
-      options={{
-        chart: {
-          id: "mira-chart",
-        },
-        xaxis: {
-          // categories: category
-        },
-      }}
-      series={[{}]}
-    />
+    <>
+      {data.length > 0 ? (
+        <Chart
+          type="bar"
+          options={{
+            chart: {
+              id: "mira-chart",
+            },
+            xaxis: {
+              categories: Object.keys(chartData),
+            },
+          }}
+          series={[
+            {
+              name: "Count",
+              data: Object.values(chartData),
+            },
+          ]}
+        />
+      ) : (
+        <div>Loading bitches</div>
+      )}
+    </>
   );
 };
 
